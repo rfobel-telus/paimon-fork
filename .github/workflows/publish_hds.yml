@@ -1,0 +1,87 @@
+name: Publish HDS Release to GitHub Packages
+
+on:
+  push:
+    branches:
+      - 'hds/**'
+  workflow_dispatch:
+    inputs:
+      hds_version_suffix:
+        description: 'HDS version suffix (e.g. hds.1 → publishes 1.4.1-hds.1)'
+        required: false
+        default: 'hds.1'
+
+env:
+  JDK_VERSION: 8
+  MAVEN_OPTS: >-
+    -Xmx4096m
+    -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+    -Dmaven.wagon.http.retryHandler.requestSentEnabled=true
+
+jobs:
+  publish-hds:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JDK_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JDK_VERSION }}
+          distribution: 'temurin'
+          # Configure GitHub Packages as a Maven server
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
+
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: hds-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: hds-maven-
+
+      - name: Compute HDS version
+        id: ver
+        run: |
+          BASE=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          SUFFIX="${{ github.event.inputs.hds_version_suffix || 'hds.1' }}"
+          HDS_VERSION="${BASE}-${SUFFIX}"
+          echo "hds_version=${HDS_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Publishing version: ${HDS_VERSION}"
+
+      - name: Set project version
+        run: |
+          mvn --batch-mode versions:set \
+            -DnewVersion="${{ steps.ver.outputs.hds_version }}" \
+            -DgenerateBackupPoms=false
+
+      - name: Build and publish to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: |
+          mvn --batch-mode deploy \
+            -Pskip-webui-build \
+            -DskipTests \
+            -Dcheckstyle.skip=true \
+            -Dlicense.skip=true \
+            -Drat.skip=true \
+            -Dmaven.javadoc.skip=true \
+            -Dmaven.source.skip=true \
+            --also-make \
+            --projects \
+              paimon-api,\
+              paimon-common,\
+              paimon-format,\
+              paimon-codegen,\
+              paimon-core,\
+              paimon-flink/paimon-flink-common,\
+              paimon-flink/paimon-flink-2.1,\
+              paimon-flink/paimon-flink-cdc \
+            -DaltDeploymentRepository="github::default::https://maven.pkg.github.com/${{ github.repository }}"
