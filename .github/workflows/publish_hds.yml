@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       hds_version_suffix:
-        description: 'HDS version suffix (e.g. hds.1 → publishes 1.4.1-hds.1)'
+        description: 'HDS version suffix (e.g. hds.2 → publishes 1.4.1-hds.2)'
         required: false
-        default: 'hds.1'
+        default: 'hds.2'
 
 env:
   JDK_VERSION: 11
@@ -61,12 +61,27 @@ jobs:
             -DnewVersion="${{ steps.ver.outputs.hds_version }}" \
             -DgenerateBackupPoms=false
 
+      - name: Install root POM locally (non-recursive)
+        run: |
+          # Install paimon-parent into the local repo so child modules can resolve
+          # their <parent> without needing --also-make (which would also deploy it).
+          mvn --batch-mode install -N \
+            -Pflink2 \
+            -DskipTests \
+            -Dcheckstyle.skip=true \
+            -Dlicense.skip=true \
+            -Drat.skip=true \
+            -Dspotless.skip=true \
+            -Denforcer.skip=true
+
       - name: Build and publish to GitHub Packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
           # Assign projects to a variable to prevent shell word-splitting on commas.
+          # --also-make is intentionally omitted: root POM was already installed above,
+          # so Maven can resolve <parent> without deploying it.
           PROJECTS="paimon-api,paimon-common,paimon-format,paimon-codegen,paimon-core,paimon-flink/paimon-flink-common,paimon-flink/paimon-flink-2.1,paimon-flink/paimon-flink-cdc"
           mvn --batch-mode deploy \
             -Pflink2 \
@@ -76,6 +91,5 @@ jobs:
             -Drat.skip=true \
             -Dmaven.javadoc.skip=true \
             -Dmaven.source.skip=true \
-            --also-make \
             --projects "$PROJECTS" \
             -DaltDeploymentRepository="github::default::https://maven.pkg.github.com/${{ github.repository }}"
