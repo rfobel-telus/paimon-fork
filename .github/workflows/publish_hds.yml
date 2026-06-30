@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       hds_version_suffix:
-        description: 'HDS version suffix (e.g. hds.2 → publishes 1.4.1-hds.2)'
+        description: 'HDS version suffix (e.g. hds.3 → publishes 1.4.1-hds.3)'
         required: false
-        default: 'hds.2'
+        default: 'hds.3'
 
 env:
   JDK_VERSION: 11
@@ -50,7 +50,7 @@ jobs:
         id: ver
         run: |
           BASE=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          SUFFIX="${{ github.event.inputs.hds_version_suffix || 'hds.2' }}"
+          SUFFIX="${{ github.event.inputs.hds_version_suffix || 'hds.3' }}"
           HDS_VERSION="${BASE}-${SUFFIX}"
           echo "hds_version=${HDS_VERSION}" >> "$GITHUB_OUTPUT"
           echo "Publishing version: ${HDS_VERSION}"

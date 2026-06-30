@@ -8,7 +8,7 @@ top of the upstream release. Each patch is documented here and in the correspond
 ## P1 — `metadata.iceberg.changelog.storage`: Iceberg metadata for changelog files
 
 **Patch ID:** `ov0`  
-**Version:** `1.4.1-hds.1`  
+**Version:** `1.4.1-hds.3`  
 **Upstream PR:** (pending — will file once validated)
 
 ### Problem
