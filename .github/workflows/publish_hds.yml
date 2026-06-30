@@ -50,7 +50,7 @@ jobs:
         id: ver
         run: |
           BASE=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          SUFFIX="${{ github.event.inputs.hds_version_suffix || 'hds.1' }}"
+          SUFFIX="${{ github.event.inputs.hds_version_suffix || 'hds.2' }}"
           HDS_VERSION="${BASE}-${SUFFIX}"
           echo "hds_version=${HDS_VERSION}" >> "$GITHUB_OUTPUT"
           echo "Publishing version: ${HDS_VERSION}"
