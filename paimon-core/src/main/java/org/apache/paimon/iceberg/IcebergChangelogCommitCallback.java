@@ -63,12 +63,13 @@ import java.util.UUID;
 
 /**
  * A {@link CommitCallback} that emits Iceberg metadata for Paimon changelog files produced by
- * {@code changelog-producer=lookup}. Creates a companion Iceberg table at
- * {@code <iceberg-root>/<table>_changelog/metadata/} with no data duplication — only manifest
- * pointers to the existing {@code changelog-*.parquet} files that Paimon already writes to GCS.
+ * {@code changelog-producer=lookup}. Creates a companion Iceberg table at {@code
+ * <iceberg-root>/<table>_changelog/metadata/} with no data duplication — only manifest pointers to
+ * the existing {@code changelog-*.parquet} files that Paimon already writes to GCS.
  *
  * <p>Enabled by {@code metadata.iceberg.changelog.storage} (alongside {@code
  * metadata.iceberg.storage}). The resulting Iceberg table exposes all changelog fields plus:
+ *
  * <ul>
  *   <li>{@code _value_kind} (int): 0=INSERT, 1=UPDATE_BEFORE, 2=UPDATE_AFTER, 3=DELETE
  *   <li>{@code _sequence_number} (long): monotonically increasing within a checkpoint
@@ -79,8 +80,7 @@ import java.util.UUID;
  */
 public class IcebergChangelogCommitCallback implements CommitCallback, TagCallback {
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(IcebergChangelogCommitCallback.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IcebergChangelogCommitCallback.class);
 
     private static final String VERSION_HINT_FILENAME = "version-hint.text";
 
@@ -154,8 +154,7 @@ public class IcebergChangelogCommitCallback implements CommitCallback, TagCallba
 
         // Schema: user columns from the latest Paimon table schema
         SchemaManager schemaManager =
-                new SchemaManager(
-                        table.fileIO(), table.location(), table.coreOptions().branch());
+                new SchemaManager(table.fileIO(), table.location(), table.coreOptions().branch());
         TableSchema tableSchema = schemaManager.latest().orElse(null);
         if (tableSchema == null) {
             return;
@@ -163,8 +162,7 @@ public class IcebergChangelogCommitCallback implements CommitCallback, TagCallba
 
         IcebergSchema baseSchema = IcebergSchema.create(tableSchema);
         IcebergSchema changelogSchema = buildChangelogSchema(baseSchema);
-        List<IcebergPartitionField> partitionFields =
-                buildPartitionFields(tableSchema, baseSchema);
+        List<IcebergPartitionField> partitionFields = buildPartitionFields(tableSchema, baseSchema);
 
         // Collect all live changelog file entries from all currently-retained Paimon snapshots
         DataFilePathFactories pathFactories =
