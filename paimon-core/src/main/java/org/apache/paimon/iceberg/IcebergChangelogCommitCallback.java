@@ -174,7 +174,8 @@ public class IcebergChangelogCommitCallback implements CommitCallback, TagCallba
             try {
                 snapshot = snapshotManager.snapshot(snapshotId);
             } catch (Exception e) {
-                LOG.debug("Snapshot {} no longer exists, skipping for changelog metadata",
+                LOG.debug(
+                        "Snapshot {} no longer exists, skipping for changelog metadata",
                         snapshotId);
                 continue;
             }
@@ -224,8 +225,7 @@ public class IcebergChangelogCommitCallback implements CommitCallback, TagCallba
         // Write Iceberg manifest list
         String manifestListFileName;
         if (entries.isEmpty()) {
-            manifestListFileName =
-                    icebergManifestList.writeWithoutRolling(Collections.emptyList());
+            manifestListFileName = icebergManifestList.writeWithoutRolling(Collections.emptyList());
         } else {
             List<IcebergManifestFileMeta> manifestFileMetas =
                     icebergManifestFile.rollingWrite(entries.iterator(), latestSnapshotId);
@@ -282,9 +282,9 @@ public class IcebergChangelogCommitCallback implements CommitCallback, TagCallba
     // -----------------------------------------------------------------------------------------
 
     /**
-     * Builds the Iceberg schema for the changelog companion table: all user columns from the
-     * Paimon table schema, plus {@code _value_kind} (int) and {@code _sequence_number} (long)
-     * appended at the end with fresh field IDs.
+     * Builds the Iceberg schema for the changelog companion table: all user columns from the Paimon
+     * table schema, plus {@code _value_kind} (int) and {@code _sequence_number} (long) appended at
+     * the end with fresh field IDs.
      */
     private IcebergSchema buildChangelogSchema(IcebergSchema baseSchema) {
         int highestFieldId = baseSchema.highestFieldId();
@@ -332,12 +332,11 @@ public class IcebergChangelogCommitCallback implements CommitCallback, TagCallba
     // -----------------------------------------------------------------------------------------
 
     /**
-     * Returns the existing table UUID from the last written changelog metadata, or generates a
-     * new UUID if no prior metadata exists. Keeps the UUID stable across snapshot commits.
+     * Returns the existing table UUID from the last written changelog metadata, or generates a new
+     * UUID if no prior metadata exists. Keeps the UUID stable across snapshot commits.
      */
     private String getOrCreateTableUuid() throws IOException {
-        Path versionHint =
-                new Path(pathFactory.metadataDirectory(), VERSION_HINT_FILENAME);
+        Path versionHint = new Path(pathFactory.metadataDirectory(), VERSION_HINT_FILENAME);
         if (table.fileIO().exists(versionHint)) {
             try {
                 String content = table.fileIO().readFileUtf8(versionHint).trim();
