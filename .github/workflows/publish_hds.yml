@@ -12,7 +12,7 @@ on:
         default: 'hds.1'
 
 env:
-  JDK_VERSION: 8
+  JDK_VERSION: 11
   MAVEN_OPTS: >-
     -Xmx4096m
     -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
