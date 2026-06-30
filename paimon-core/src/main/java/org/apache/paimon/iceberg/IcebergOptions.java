@@ -47,6 +47,19 @@ public class IcebergOptions {
                             "When set, produce Iceberg metadata after a snapshot is committed, "
                                     + "so that Iceberg readers can read Paimon's raw data files.");
 
+    public static final ConfigOption<StorageType> METADATA_ICEBERG_CHANGELOG_STORAGE =
+            key("metadata.iceberg.changelog.storage")
+                    .enumType(StorageType.class)
+                    .defaultValue(StorageType.DISABLED)
+                    .withDescription(
+                            "When set alongside 'metadata.iceberg.storage', also produce a companion "
+                                    + "Iceberg table for the Paimon changelog files (changelog-*.parquet) "
+                                    + "emitted by changelog-producer=lookup. The companion table is written "
+                                    + "to '<iceberg-root>/<table>_changelog/metadata/' and exposes the full "
+                                    + "CDC stream (INSERT/UPDATE_BEFORE/UPDATE_AFTER/DELETE) as a queryable "
+                                    + "Iceberg table with no data duplication — only metadata pointers are "
+                                    + "added. Requires 'metadata.iceberg.storage' to be set.");
+
     public static final ConfigOption<StorageLocation> METADATA_ICEBERG_STORAGE_LOCATION =
             key("metadata.iceberg.storage-location")
                     .enumType(StorageLocation.class)

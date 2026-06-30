@@ -26,6 +26,7 @@ import org.apache.paimon.data.InternalRow;
 import org.apache.paimon.format.FileFormat;
 import org.apache.paimon.fs.FileIO;
 import org.apache.paimon.fs.Path;
+import org.apache.paimon.iceberg.IcebergChangelogCommitCallback;
 import org.apache.paimon.iceberg.IcebergCommitCallback;
 import org.apache.paimon.iceberg.IcebergOptions;
 import org.apache.paimon.index.IndexFileHandler;
@@ -415,6 +416,10 @@ abstract class AbstractFileStore<T> implements FileStore<T> {
         if (options.toConfiguration().get(IcebergOptions.METADATA_ICEBERG_STORAGE)
                 != IcebergOptions.StorageType.DISABLED) {
             callbacks.add(new IcebergCommitCallback(table, commitUser));
+            if (options.toConfiguration().get(IcebergOptions.METADATA_ICEBERG_CHANGELOG_STORAGE)
+                    != IcebergOptions.StorageType.DISABLED) {
+                callbacks.add(new IcebergChangelogCommitCallback(table, commitUser));
+            }
         }
 
         if (options.isChainTable()) {
