@@ -69,6 +69,7 @@ jobs:
           # Assign projects to a variable to prevent shell word-splitting on commas.
           PROJECTS="paimon-api,paimon-common,paimon-format,paimon-codegen,paimon-core,paimon-flink/paimon-flink-common,paimon-flink/paimon-flink-2.1,paimon-flink/paimon-flink-cdc"
           mvn --batch-mode deploy \
+            -Pflink2 \
             -DskipTests \
             -Dcheckstyle.skip=true \
             -Dlicense.skip=true \
