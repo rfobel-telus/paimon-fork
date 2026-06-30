@@ -66,7 +66,7 @@ jobs:
           # Use --also-make to install paimon-parent + all transitive intra-project
           # deps (e.g. paimon-test-utils) into the local Maven repo. Running 'install'
           # (not 'deploy') means nothing is uploaded to GitHub Packages here.
-          PROJECTS="paimon-api,paimon-common,paimon-format,paimon-codegen,paimon-core,paimon-flink/paimon-flink-common,paimon-flink/paimon-flink-2.1,paimon-flink/paimon-flink-cdc"
+          PROJECTS="paimon-api,paimon-common,paimon-format,paimon-codegen,paimon-core,paimon-flink/paimon-flink-common,paimon-flink/paimon-flink-2.1,paimon-flink/paimon-flink-cdc,!paimon-lumina"
           mvn --batch-mode install \
             -Pflink2 \
             -DskipTests \
@@ -88,7 +88,7 @@ jobs:
           # All deps (paimon-parent, paimon-test-utils, etc.) are already in the
           # local Maven repo from the install step above. Run deploy without
           # --also-make so the root POM is never in scope for the deploy phase.
-          PROJECTS="paimon-api,paimon-common,paimon-format,paimon-codegen,paimon-core,paimon-flink/paimon-flink-common,paimon-flink/paimon-flink-2.1,paimon-flink/paimon-flink-cdc"
+          PROJECTS="paimon-api,paimon-common,paimon-format,paimon-codegen,paimon-core,paimon-flink/paimon-flink-common,paimon-flink/paimon-flink-2.1,paimon-flink/paimon-flink-cdc,!paimon-lumina"
           mvn --batch-mode deploy \
             -Pflink2 \
             -DskipTests \
