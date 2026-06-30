@@ -66,8 +66,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
+          # Assign projects to a variable to prevent shell word-splitting on commas.
+          PROJECTS="paimon-api,paimon-common,paimon-format,paimon-codegen,paimon-core,paimon-flink/paimon-flink-common,paimon-flink/paimon-flink-2.1,paimon-flink/paimon-flink-cdc"
           mvn --batch-mode deploy \
-            -Pskip-webui-build \
             -DskipTests \
             -Dcheckstyle.skip=true \
             -Dlicense.skip=true \
@@ -75,13 +76,5 @@ jobs:
             -Dmaven.javadoc.skip=true \
             -Dmaven.source.skip=true \
             --also-make \
-            --projects \
-              paimon-api,\
-              paimon-common,\
-              paimon-format,\
-              paimon-codegen,\
-              paimon-core,\
-              paimon-flink/paimon-flink-common,\
-              paimon-flink/paimon-flink-2.1,\
-              paimon-flink/paimon-flink-cdc \
+            --projects "$PROJECTS" \
             -DaltDeploymentRepository="github::default::https://maven.pkg.github.com/${{ github.repository }}"
