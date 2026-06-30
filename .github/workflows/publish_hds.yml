@@ -61,11 +61,29 @@ jobs:
             -DnewVersion="${{ steps.ver.outputs.hds_version }}" \
             -DgenerateBackupPoms=false
 
+      - name: Install paimon-lumina stub
+        run: |
+          # paimon-flink-common has paimon-lumina as a test-scoped dep.
+          # paimon-lumina itself needs lumina-jni:0.1.0 from Aliyun OSS which is
+          # unreachable from GHA runners. Install an empty stub so dependency
+          # resolution succeeds without building the real module.
+          mkdir -p /tmp/lumina-stub
+          touch /tmp/lumina-stub/placeholder
+          jar cf /tmp/paimon-lumina-stub.jar -C /tmp/lumina-stub placeholder
+          mvn --batch-mode install:install-file \
+            -Dfile=/tmp/paimon-lumina-stub.jar \
+            -DgroupId=org.apache.paimon \
+            -DartifactId=paimon-lumina \
+            -Dversion="${{ steps.ver.outputs.hds_version }}" \
+            -Dpackaging=jar \
+            -DgeneratePom=true
+
       - name: Install all selected modules and their deps (no deploy)
         run: |
           # Use --also-make to install paimon-parent + all transitive intra-project
           # deps (e.g. paimon-test-utils) into the local Maven repo. Running 'install'
           # (not 'deploy') means nothing is uploaded to GitHub Packages here.
+          # paimon-lumina is excluded from reactor — its stub is already installed above.
           PROJECTS="paimon-api,paimon-common,paimon-format,paimon-codegen,paimon-core,paimon-flink/paimon-flink-common,paimon-flink/paimon-flink-2.1,paimon-flink/paimon-flink-cdc,!paimon-lumina"
           mvn --batch-mode install \
             -Pflink2 \
