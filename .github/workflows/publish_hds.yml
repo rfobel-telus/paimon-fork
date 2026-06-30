@@ -106,7 +106,9 @@ jobs:
           # All deps (paimon-parent, paimon-test-utils, etc.) are already in the
           # local Maven repo from the install step above. Run deploy without
           # --also-make so the root POM is never in scope for the deploy phase.
-          PROJECTS="paimon-api,paimon-common,paimon-format,paimon-codegen,paimon-core,paimon-flink/paimon-flink-common,paimon-flink/paimon-flink-2.1,paimon-flink/paimon-flink-cdc,!paimon-lumina"
+          # paimon-lumina is simply not listed — no !exclusion needed here because
+          # without --also-make Maven only sees the projects we explicitly name.
+          PROJECTS="paimon-api,paimon-common,paimon-format,paimon-codegen,paimon-core,paimon-flink/paimon-flink-common,paimon-flink/paimon-flink-2.1,paimon-flink/paimon-flink-cdc"
           mvn --batch-mode deploy \
             -Pflink2 \
             -DskipTests \
