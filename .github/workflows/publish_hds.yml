@@ -61,27 +61,33 @@ jobs:
             -DnewVersion="${{ steps.ver.outputs.hds_version }}" \
             -DgenerateBackupPoms=false
 
-      - name: Install root POM locally (non-recursive)
+      - name: Install all selected modules and their deps (no deploy)
         run: |
-          # Install paimon-parent into the local repo so child modules can resolve
-          # their <parent> without needing --also-make (which would also deploy it).
-          mvn --batch-mode install -N \
+          # Use --also-make to install paimon-parent + all transitive intra-project
+          # deps (e.g. paimon-test-utils) into the local Maven repo. Running 'install'
+          # (not 'deploy') means nothing is uploaded to GitHub Packages here.
+          PROJECTS="paimon-api,paimon-common,paimon-format,paimon-codegen,paimon-core,paimon-flink/paimon-flink-common,paimon-flink/paimon-flink-2.1,paimon-flink/paimon-flink-cdc"
+          mvn --batch-mode install \
             -Pflink2 \
             -DskipTests \
             -Dcheckstyle.skip=true \
             -Dlicense.skip=true \
             -Drat.skip=true \
             -Dspotless.skip=true \
-            -Denforcer.skip=true
+            -Denforcer.skip=true \
+            -Dmaven.javadoc.skip=true \
+            -Dmaven.source.skip=true \
+            --also-make \
+            --projects "$PROJECTS"
 
-      - name: Build and publish to GitHub Packages
+      - name: Deploy selected modules to GitHub Packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          # Assign projects to a variable to prevent shell word-splitting on commas.
-          # --also-make is intentionally omitted: root POM was already installed above,
-          # so Maven can resolve <parent> without deploying it.
+          # All deps (paimon-parent, paimon-test-utils, etc.) are already in the
+          # local Maven repo from the install step above. Run deploy without
+          # --also-make so the root POM is never in scope for the deploy phase.
           PROJECTS="paimon-api,paimon-common,paimon-format,paimon-codegen,paimon-core,paimon-flink/paimon-flink-common,paimon-flink/paimon-flink-2.1,paimon-flink/paimon-flink-cdc"
           mvn --batch-mode deploy \
             -Pflink2 \
